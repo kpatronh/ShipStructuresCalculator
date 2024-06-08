@@ -1,1 +1,3 @@
-Design and analysis of ship structures
+*ShipStructuresCalculator*
+
+- Design and analysis of ship structures 
