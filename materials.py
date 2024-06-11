@@ -6,6 +6,9 @@ class Material:
     def __repr__(self):
         class_name = type(self).__name__
         return f"{class_name}(name={self.name}, properties={self.properties})"
+    
+    def __str__(self) -> str:
+        return self.name
 
 
 class Steel(Material):
@@ -18,5 +21,6 @@ if __name__ == "__main__":
                                                             poisson_ratio=0.3,
                                                             young_modulus=2.1e11))
         print(material)
+        print(repr(material))
     
     test1()

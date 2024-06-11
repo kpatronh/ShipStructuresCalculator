@@ -1,5 +1,5 @@
 import numpy as np
-from geometry import Rectangle
+from geometry import Rectangle, from_rad_to_deg, from_deg_to_rad
 from materials import Steel
 
 class FlatPlate(Rectangle):
@@ -9,7 +9,11 @@ class FlatPlate(Rectangle):
     
     def __repr__(self):
         class_name = type(self).__name__
-        return f"{class_name}(material={self.material}, \n\tlength={self.width}, thickness={self.height}, position={self.position!r}, angle(deg)={round(self.angle*180/np.pi, 3)!r})"
+        return f"{class_name}(length={self.width}, thickness={self.height}, position={self.position}, angle={from_rad_to_deg(self.angle)}, material={self.material})"
+
+    def __str__(self):
+        return f"PL {self.height}, {self.material.name}, at {self.position} with orientation {from_rad_to_deg(self.angle)} degrees"
+    
 
 if __name__ == '__main__':
 
@@ -19,6 +23,7 @@ if __name__ == '__main__':
                                                             young_modulus=2.1e11))
         plate = FlatPlate(length=1000, thickness=6.35, position=[0,0], angle=0.0, material=material)
         print(plate)
-        print('Properties:\n',plate.section_properties)
+        print(repr(plate))
+        plate.plot()
     
     test1()
