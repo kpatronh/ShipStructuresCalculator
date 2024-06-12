@@ -121,6 +121,14 @@ class Rectangle:
     def __str__(self) -> str:
         return f"Rectangle of width {self.width} and height {self.height}, placed at {self.position} and oriented {from_rad_to_deg(self.angle)} degrees"
 
+    def move(self, displacement):
+        self.position += np.array(displacement)
+
+    def rotate(self, center, angle):
+        self.angle += angle
+        #pos to be determined
+
+
 class RectanglesBasedGeometry:
     def __init__(self, rectangles):
         self.components = rectangles
@@ -276,9 +284,20 @@ if __name__ == "__main__":
         print(rect2.bounding_box)
         print(angle_section)
         angle_section.plot()
-        
 
-    test3()
+    def test4():
+        thickness = 25.4
+        height = 300
+        keel = Rectangle(width=height, height=thickness, position=[0,0], angle=90)
+        print(keel)
+        print(keel.section_properties)
+        print(repr(keel))
+        keel.plot()
+        keel.move([500, 0])
+        print(keel)
+        keel.plot()
+
+    test4()
         
 
 
