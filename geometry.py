@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+from scipy.linalg import norm
 
 class Rectangle:
     def __init__(self, width, height, position, angle): 
@@ -124,9 +125,29 @@ class Rectangle:
     def move(self, displacement):
         self.position += np.array(displacement)
 
-    def rotate(self, center, angle):
-        self.angle += angle
-        #pos to be determined
+    def rotate(self, rotation_point, angle):
+        rotation_angle = from_deg_to_rad(angle)
+        self.angle += rotation_angle
+
+        rotation_point = np.array(rotation_point)
+
+        # Calculate the rotation matrix
+        rotation_matrix = np.array([
+            [np.cos(rotation_angle), -np.sin(rotation_angle)],
+            [np.sin(rotation_angle), np.cos(rotation_angle)]
+        ])
+
+        # Translate the reference point to the origin relative to the rotation point
+        translated_ref_point = self.position - rotation_point
+        
+        # Apply the rotation
+        rotated_point = rotation_matrix.dot(translated_ref_point)
+        
+        # Translate back to the original coordinate system
+        self.position = rotated_point + rotation_point
+        
+        
+        
 
 
 class RectanglesBasedGeometry:
@@ -216,8 +237,13 @@ class RectanglesBasedGeometry:
         ax.set_aspect('equal', adjustable='box')
         plt.show()
 
-    
+    def move(self, displacement):
+        for rect in self.components:
+            rect.move(displacement)
 
+    def rotate(self, center, angle):
+        for rect in self.components:
+            rect.rotate(center, angle)
 
 
 def from_rad_to_deg(rad):
@@ -297,7 +323,31 @@ if __name__ == "__main__":
         print(keel)
         keel.plot()
 
-    test4()
+    def test5():
+        thickness = 25.4
+        height = 300
+        keel = Rectangle(width=height, height=thickness, position=[0,0], angle=90)
+        keel.plot()
+        keel.rotate(center=[0,150], angle=-45)
+        keel.plot()
+
+    def test6():
+        rect1 = Rectangle(width=40, height=10, position=[0, 5], angle=0)
+        rect2 = Rectangle(width=40, height=10, position=[5, 10], angle=90)
+        angle_section = RectanglesBasedGeometry([rect1, rect2])
+        angle_section.plot()
+        angle_section.move([100, 100])
+        angle_section.plot()
+
+    def test7():
+        rect1 = Rectangle(width=80, height=10, position=[0, 5], angle=0)
+        rect2 = Rectangle(width=40, height=10, position=[5, 10], angle=90)
+        angle_section = RectanglesBasedGeometry([rect1, rect2])
+        angle_section.plot()
+        angle_section.rotate(center=[0,0], angle=45)
+        angle_section.plot()
+
+    test7()
         
 
 
