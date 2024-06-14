@@ -146,10 +146,6 @@ class Rectangle:
         # Translate back to the original coordinate system
         self.position = rotated_point + rotation_point
         
-        
-        
-
-
 class RectanglesBasedGeometry:
     def __init__(self, rectangles):
         self.components = rectangles
@@ -244,7 +240,6 @@ class RectanglesBasedGeometry:
     def rotate(self, center, angle):
         for rect in self.components:
             rect.rotate(center, angle)
-
 
 def from_rad_to_deg(rad):
     return round(rad * (180.0/np.pi), 6)
