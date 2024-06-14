@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
-from scipy.linalg import norm
 
 class Rectangle:
     def __init__(self, width, height, position, angle): 
@@ -339,7 +338,7 @@ if __name__ == "__main__":
         rect2 = Rectangle(width=40, height=10, position=[5, 10], angle=90)
         angle_section = RectanglesBasedGeometry([rect1, rect2])
         angle_section.plot()
-        angle_section.rotate(center=[0,0], angle=45)
+        angle_section.rotate(center=[0,0], angle=90)
         angle_section.plot()
 
     test7()
