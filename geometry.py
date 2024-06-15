@@ -15,15 +15,15 @@ class Rectangle:
         self.width = width
         self.height = height
         self.position = np.array(position)
-        self.angle = from_deg_to_rad(angle) # in radians 
+        self.angle = angle 
     
     @property 
     def unit_direction(self):
-        return np.array([np.cos(self.angle), np.sin(self.angle)])
-
+        return np.array([np.cos(np.radians(self.angle)), np.sin(np.radians(self.angle))])
+        
     @property
     def unit_normal(self):
-        return  np.array([-np.sin(self.angle), np.cos(self.angle)])
+        return np.array([-np.sin(np.radians(self.angle)), np.cos(np.radians(self.angle))])
 
     @property
     def area(self):
@@ -46,9 +46,9 @@ class Rectangle:
         Iyz = 0.0
 
         # moment of inertia with respect to axes paralell to the cartesian axes, centered on the centroid
-        Iyp = 0.5*(Iy + Iz) + 0.5*(Iy - Iz)*np.cos(-2*self.angle)  
-        Izp = 0.5*(Iy + Iz) - 0.5*(Iy - Iz)*np.cos(-2*self.angle)
-        Iyzp = 0.5*(Iy - Iz)*np.sin(-2*self.angle) 
+        Iyp = 0.5*(Iy + Iz) + 0.5*(Iy - Iz)*np.cos(-2*np.radians(self.angle))  
+        Izp = 0.5*(Iy + Iz) - 0.5*(Iy - Iz)*np.cos(-2*np.radians(self.angle))
+        Iyzp = 0.5*(Iy - Iz)*np.sin(-2*np.radians(self.angle)) 
         return dict(Iy=Iy, Iz=Iz, Ix=Ix,  Iyz=Iyz,  Iyp=Iyp, Izp=Izp, Iyzp=Iyzp)
     
     def compute_inertia_wrt_parallel_axes(self, axes_center):
@@ -98,7 +98,7 @@ class Rectangle:
         ax.add_patch(plt.Rectangle(xy=(pos[0],pos[1]),
                                    width=self.width,
                                    height=self.height,
-                                   angle=from_rad_to_deg(self.angle),
+                                   angle=self.angle,
                                    edgecolor = edgecolor,
                                    facecolor = facecolor,
                                    fill=fill,
@@ -116,20 +116,20 @@ class Rectangle:
 
     def __repr__(self):
         class_name = type(self).__name__
-        return f"{class_name}(width={self.width}, height={self.height}, position={self.position}, angle(deg)={from_rad_to_deg(self.angle)})"
+        return f"{class_name}(width={self.width}, height={self.height}, position={self.position}, angle(deg)={self.angle})"
 
     def __str__(self) -> str:
-        return f"Rectangle of width {self.width} and height {self.height}, placed at {self.position} and oriented {from_rad_to_deg(self.angle)} degrees"
+        return f"Rectangle of width {self.width} and height {self.height}, placed at {self.position} and oriented {self.angle} degrees"
 
     def move(self, displacement):
         self.position += np.array(displacement)
 
     def rotate(self, rotation_point, angle):
-        rotation_angle = from_deg_to_rad(angle)
-        self.angle += rotation_angle
+        self.angle += angle
 
         rotation_point = np.array(rotation_point)
-
+        rotation_angle = np.radians(angle)
+        
         # Calculate the rotation matrix
         rotation_matrix = np.array([
             [np.cos(rotation_angle), -np.sin(rotation_angle)],
@@ -144,6 +144,7 @@ class Rectangle:
         
         # Translate back to the original coordinate system
         self.position = rotated_point + rotation_point
+
         
 class RectanglesBasedGeometry:
     def __init__(self, rectangles):
@@ -215,7 +216,7 @@ class RectanglesBasedGeometry:
             patch_rect = matplotlib.patches.Rectangle(xy=(pos[0],pos[1]),
                                                             width=rect.width,
                                                             height=rect.height,
-                                                            angle= from_rad_to_deg(rect.angle),
+                                                            angle= rect.angle,
                                                             edgecolor = edgecolor,
                                                             facecolor = facecolor,
                                                             fill=fill,
@@ -236,25 +237,13 @@ class RectanglesBasedGeometry:
         for rect in self.components:
             rect.move(displacement)
 
-    def rotate(self, center, angle):
+    def rotate(self, rotation_point, angle):
         for rect in self.components:
-            rect.rotate(center, angle)
+            rect.rotate(rotation_point, angle)
 
-def from_rad_to_deg(rad):
-    return round(rad * (180.0/np.pi), 6)
-
-def from_deg_to_rad(deg):
-    return round(deg * (np.pi/180.0), 6)
 
 if __name__ == "__main__":
     
-    def test0():
-        deg = 180
-        print(f"{deg} degrees in radians is {from_deg_to_rad(deg)}")
-
-        rad = np.pi/2
-        print(f"{rad} rad in degrees is {from_rad_to_deg(rad)}")
-
     def test1():
         thickness = 25.4
         height = 300
@@ -322,7 +311,7 @@ if __name__ == "__main__":
         height = 300
         keel = Rectangle(width=height, height=thickness, position=[0,0], angle=90)
         keel.plot()
-        keel.rotate(center=[0,150], angle=-45)
+        keel.rotate(rotation_point=[0,0], angle=-45)
         keel.plot()
 
     def test6():
@@ -338,7 +327,7 @@ if __name__ == "__main__":
         rect2 = Rectangle(width=40, height=10, position=[5, 10], angle=90)
         angle_section = RectanglesBasedGeometry([rect1, rect2])
         angle_section.plot()
-        angle_section.rotate(center=[0,0], angle=90)
+        angle_section.rotate(rotation_point=[0,0], angle=45)
         angle_section.plot()
 
     test7()
