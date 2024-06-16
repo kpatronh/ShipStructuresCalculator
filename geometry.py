@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
+
 class Rectangle:
     def __init__(self, width, height, position, angle): 
         """This class represents a rectangle, based on its dimensions, position and orientation
@@ -123,6 +124,7 @@ class Rectangle:
 
     def move(self, displacement):
         self.position += np.array(displacement)
+        #return self.position
 
     def rotate(self, rotation_point, angle):
         self.angle += angle
@@ -144,9 +146,11 @@ class Rectangle:
         
         # Translate back to the original coordinate system
         self.position = rotated_point + rotation_point
+        #return self.position, self.angle
 
-        
 class RectanglesBasedGeometry:
+    """This class is used to represent a SINGLE geometry compound of rectangles
+    """
     def __init__(self, rectangles):
         self.components = rectangles
 
@@ -241,6 +245,128 @@ class RectanglesBasedGeometry:
         for rect in self.components:
             rect.rotate(rotation_point, angle)
 
+class RectanglesBasedGeometries:
+    def __init__(self, geometries) -> None:
+        self.geometries = geometries
+
+    @property
+    def area(self):
+        a = 0.0
+        c = np.array([0.0, 0.0])
+        for geometry in self.geometries:
+            if isinstance(geometry, RectanglesBasedGeometry):
+                for rect in geometry.components:
+                    a += rect.area
+            elif isinstance(geometry, Rectangle):
+                a += geometry.area
+        return c/a
+
+    @property
+    def centroid(self):
+        a = 0.0
+        c = np.array([0.0, 0.0])
+        for geometry in self.geometries:
+            if isinstance(geometry, RectanglesBasedGeometry):
+                for rect in geometry.components:
+                    a += rect.area
+                    c += rect.centroid * rect.area
+            elif isinstance(geometry, Rectangle):
+                a += geometry.area
+                c += geometry.centroid * geometry.area
+        return c/a
+
+    @property
+    def inertia(self):
+    # area inertia with respect to centroid axes of the compound geometry
+        centroid = self.centroid
+        Iy, Iz, Ix, Iyz = 0.0, 0.0, 0.0, 0.0
+        for geometry in self.geometries:
+            if isinstance(geometry, RectanglesBasedGeometry):
+                for rect in geometry.components:
+                    Irect = rect.inertia_wrt_parallel_axes(centroid)
+                    Iy += Irect['Iya']
+                    Iz += Irect['Iza']
+                    Ix += Irect['Ixa']
+                    Iyz += Irect['Iyza']
+            elif isinstance(geometry, Rectangle):
+                Irect = geometry.inertia_wrt_parallel_axes(centroid)
+                Iy += Irect['Iya']
+                Iz += Irect['Iza']
+                Ix += Irect['Ixa']
+                Iyz += Irect['Iyza']
+
+        return dict(Iy=Iy, Iz=Iz, Ix=Ix, Iyz=Iyz)    
+    
+    @property
+    def section_properties(self):
+        return f"area = {self.area}\
+               \ncentroid = {self.centroid}\
+               \ninertia = {self.inertia}"
+
+    @property
+    def bounding_box(self):
+        xs, ys = [], []
+        for geometry in self.geometries:
+            if isinstance(geometry, RectanglesBasedGeometry):
+                for rect in geometry.components:
+                    min_x, max_x, min_y, max_y = rect.bounding_box
+                    xs.append(min_x)
+                    xs.append(max_x)
+                    ys.append(min_y)
+                    ys.append(max_y)
+            elif isinstance(geometry, Rectangle):
+                min_x, max_x, min_y, max_y = geometry.bounding_box
+                xs.append(min_x)
+                xs.append(max_x)
+                ys.append(min_y)
+                ys.append(max_y)
+    
+        min_x, max_x, min_y, max_y = min(xs), max(xs), min(ys), max(ys)
+        return min_x, max_x, min_y, max_y
+                    
+    def plot(self, edgecolor='gray', facecolor='silver', fill=True, line_width=1.5):    
+        plt.figure()
+        fig = plt.gcf()
+        ax = fig.gca()
+        
+        for geometry in self.geometries:
+            if isinstance(geometry, RectanglesBasedGeometry):
+                for rect in geometry.components:
+                    pos = rect.position - 0.5*rect.height*rect.unit_normal
+                    patch_rect = matplotlib.patches.Rectangle(xy=(pos[0],pos[1]),
+                                                                    width=rect.width,
+                                                                    height=rect.height,
+                                                                    angle= rect.angle,
+                                                                    edgecolor = edgecolor,
+                                                                    facecolor = facecolor,
+                                                                    fill=fill,
+                                                                    lw=line_width)
+                    ax.add_patch(patch_rect)
+                    
+            elif isinstance(geometry, Rectangle):
+                pos = geometry.position - 0.5*geometry.height*geometry.unit_normal
+                patch_rect = matplotlib.patches.Rectangle(xy=(pos[0],pos[1]),
+                                                          width=geometry.width,
+                                                          height=geometry.height,
+                                                          angle= geometry.angle,
+                                                          edgecolor = edgecolor,
+                                                          facecolor = facecolor,
+                                                          fill=fill,
+                                                          lw=line_width)
+                ax.add_patch(patch_rect)    
+                
+        min_x, max_x, min_y, max_y = self.bounding_box
+        dx = abs(max_x - min_x)
+        dy = abs(max_y - min_y)
+        kx = dy/10
+        ky = dx/10
+        plt.xlim([min_x - kx*dx, max_x + kx*dx])
+        plt.ylim([min_y - ky*dy, max_y + ky*dy])
+        plt.grid()
+        ax.set_aspect('equal', adjustable='box')
+        plt.show()
+
+
 
 if __name__ == "__main__":
     
@@ -330,8 +456,21 @@ if __name__ == "__main__":
         angle_section.rotate(rotation_point=[0,0], angle=45)
         angle_section.plot()
 
-    test7()
-        
+    def test8():
+        thickness = 25.4
+        height = 300
+        keel = Rectangle(width=height, height=thickness, position=[0,0], angle=90)
+        print(keel)
+        print(keel.section_properties)
+        print(repr(keel))
+        keel.plot()
+        keel.width = 500
+        print(keel)
+        print(keel.section_properties)
+        print(repr(keel))
+        keel.plot()
+
+    test6()
 
 
 
