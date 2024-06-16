@@ -5,6 +5,7 @@ from materials import Steel
 class FlatBar(Rectangle):
     def __init__(self, web_length, thickness, position, angle, material) -> None:
         self.web_length = web_length
+        self.height = thickness
         self.thickness = thickness
         self.material = material
         super().__init__(web_length, thickness, position, angle)
@@ -57,6 +58,7 @@ class Angle(RectanglesBasedGeometry):
         class_name = type(self).__name__
         return f"{class_name}(web_length={self.web_length}, web_thickness={self.web_thickness}, flange_length={self.flange_length}, flange_thickness={self.flange_thickness}, position={self.position}, angle={self.angle}, material={self.material})"
 
+
 class Bulb(Angle):
     """
     Class used to represent bulb profiles
@@ -65,7 +67,6 @@ class Bulb(Angle):
     Reference: https://amarineblog.com/wp-content/uploads/2017/07/dnvgl-structure-detail-guide.pdf
     """
     def __init__(self, length, thickness, position, angle, material) -> None:
-        # dimensions of stiffeners are to be in mm
         self.length = length
         self.thickness = thickness
         web_length, web_thickness, flange_length, flange_thickness = self._get_equivalent_angle_dimensions()
@@ -153,4 +154,4 @@ if __name__ == '__main__':
         stiffener.reverse_orientation()
         stiffener.plot()
 
-    test4()
+    test2()
