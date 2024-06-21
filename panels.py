@@ -97,7 +97,9 @@ if __name__ == '__main__':
         
         panel = GeneralFlatPanel(plating=plating,
                                  stiffeners=[stiffener, stiffener2, stiffener3, stiffener4])
-        
+        print(panel.area)
+        print(panel.inertia)
+        print(panel.centroid)
         panel.plot()
 
     
