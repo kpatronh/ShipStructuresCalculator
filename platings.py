@@ -79,12 +79,20 @@ class FlatPlate(RectanglesBasedGeometry):
     
     @classmethod
     def from_endpoints(cls, initial_point, final_point, thickness, material):
-        position = initial_point
-        dif = final_point - initial_point
+        position = np.array(initial_point)
+        dif = np.array(final_point) - np.array(initial_point)
         length = np.linalg.norm(dif)
         unit_dir = dif/length
         angle = np.degrees(np.arccos(unit_dir[0]))
         return cls(length, thickness, position, angle, material)
+
+    @property
+    def unit_direction(self):
+        return self._plate.unit_direction
+    
+    @property
+    def unit_normal(self):
+        return self._plate.unit_normal
 
 if __name__ == '__main__':
 
