@@ -4,12 +4,12 @@ from materials import Steel
 
 
 class FlatBar(RectanglesBasedGeometry):
-    def __init__(self, web_length, thickness, position, angle, material):
+    def __init__(self, web_length, thickness, material, position=[0,0], angle=90):
         self._web_length = web_length
         self._thickness = thickness
+        self._material = material
         self._position = position
         self._angle = angle 
-        self._material = material
         self._web = None
         self._create()
 
@@ -36,6 +36,15 @@ class FlatBar(RectanglesBasedGeometry):
         self._create()
 
     @property
+    def material(self):
+        return self._material
+    
+    @material.setter
+    def material(self, new_material):
+        self._material = new_material
+        self._create()
+        
+    @property
     def position(self):
         return self._position
     
@@ -54,15 +63,6 @@ class FlatBar(RectanglesBasedGeometry):
         self._create()
 
     @property
-    def material(self):
-        return self._material
-    
-    @material.setter
-    def material(self, new_material):
-        self._material = new_material
-        self._create()
-        
-    @property
     def web(self):
         return self._web
 
@@ -80,7 +80,7 @@ class FlatBar(RectanglesBasedGeometry):
 
 
 class Angle(RectanglesBasedGeometry):
-    def __init__(self, web_length, web_thickness, flange_length, flange_thickness, position, angle, material):
+    def __init__(self, web_length, web_thickness, flange_length, flange_thickness, material, position=[0,0], angle=90):
         self._web_length = web_length
         self._web_thickness = web_thickness
         self._flange_length = flange_length
@@ -204,7 +204,7 @@ class Bulb(Angle):
                                           Sect. 7, 1.4.1 Stiffener profile with a bulb section 
     Reference: https://amarineblog.com/wp-content/uploads/2017/07/dnvgl-structure-detail-guide.pdf
     """
-    def __init__(self, length, thickness, position, angle, material) -> None:
+    def __init__(self, length, thickness, material, position=[0,0], angle=90) -> None:
         # dimensions to be entered in mm
         self._length = length
         self._thickness = thickness
@@ -215,7 +215,7 @@ class Bulb(Angle):
 
     def _create_equivalent_angle(self):
         web_length, web_thickness, flange_length, flange_thickness = self._get_equivalent_angle_dimensions()
-        super().__init__(web_length, web_thickness, flange_length, flange_thickness, self._position, self._angle, self._material)
+        super().__init__(web_length, web_thickness, flange_length, flange_thickness, self._material, self._position, self._angle)
 
     def _get_equivalent_angle_dimensions(self):
         if self._length <= 120:
@@ -278,7 +278,7 @@ class Bulb(Angle):
         
 
 class Tee(RectanglesBasedGeometry):
-    def __init__(self, web_length, web_thickness, flange_length, flange_thickness, position, angle, material):
+    def __init__(self, web_length, web_thickness, flange_length, flange_thickness, material, position=[0,0], angle=90):
         self._web_length = web_length
         self._web_thickness = web_thickness
         self._flange_length = flange_length
@@ -396,7 +396,7 @@ if __name__ == '__main__':
 
     def test1():
         material = Steel(name='steel_A131',properties=dict(yield_strength=235e6, poisson_ratio=0.3, young_modulus=2.1e11))
-        stiffener = FlatBar(web_length=100, thickness=6.35, position=[0., 0.], angle=90, material=material)
+        stiffener = FlatBar(web_length=100, thickness=6.35, material=material)
         print(stiffener)
         print(stiffener.section_properties)
         stiffener.plot()
@@ -516,4 +516,4 @@ if __name__ == '__main__':
         print(stiffener.section_properties)
         stiffener.plot()
 
-    test4()
+    test1()
