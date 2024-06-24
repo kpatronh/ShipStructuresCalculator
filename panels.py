@@ -1,106 +1,164 @@
-from geometry import RectanglesBasedGeometry, RectanglesBasedGeometries
+from geometry import RectanglesBasedGeometries
 from stiffeners import FlatBar, Angle, Bulb, Tee
 from materials import Steel
 from platings import FlatPlate
+import copy
 
-class GeneralFlatPanel(RectanglesBasedGeometries):
-    def __init__(self, plating, stiffeners):
-        self.plating = plating
-        self.stiffeners = stiffeners
-        self._geometries = []
-        self._create_geometries()
-        super().__init__(self._geometries)
+class StiffenedPanel(RectanglesBasedGeometries):
+    def __init__(self) -> None:
+        self._plating = None
+        self._stiffeners = dict()
+        self._stiffeners_counter = 0
 
-    def _create_flatbar(self, input_params, position, angle):
-        return FlatBar(web_length=input_params['web_length'], 
-                       thickness=input_params['thickness'],
-                       position=position,
-                       angle=angle,
-                       material=input_params['material'])
+    @property
+    def plating(self):
+        return self._plating
 
-    def _create_angle(self, input_params, position, angle):
-        return Angle(web_length=input_params['web_length'],
-                     web_thickness=input_params['web_thickness'],
-                     flange_length=input_params['flange_length'],
-                     flange_thickness=input_params['flange_thickness'],
-                     position=position,
-                     angle=angle,
-                     material=input_params['material'])
+    @property
+    def stiffeners(self):
+        return self._stiffeners
+    
+    @property
+    def num_stiffeners(self):
+        return len(self._stiffeners)
 
-    def _create_bulb(self, input_params, position, angle ):
-        return Bulb(length=input_params['length'],
-                    thickness=input_params['thickness'],
-                    position=position,
-                    angle=angle,
-                    material=input_params['material'])
+    def _create(self):
+        components = []
+        components.append(self._plating)
+        for _,stiffener in self._stiffeners.items():
+            components.append(stiffener)
+        super().__init__(components)
 
-    def _create_tee(self, input_params, position, angle):
-        return Tee(web_length=input_params['web_length'],
-                   web_thickness=input_params['web_thickness'],
-                   flange_length=input_params['flange_length'],
-                   flange_thickness=input_params['flange_thickness'],
-                   position=position,
-                   angle=angle,
-                   material=input_params['material'])
+    def set_plating(self, plate):
+        self._plating = plate
+        self._create()
 
-    def _create_geometries(self):
-        self._geometries.append(self.plating)
-        
-        for stiffener in self.stiffeners:
-            stiffener_type = stiffener['type']
-            dist = stiffener['dist']
-            rel_angle = stiffener['angle']
-            input_params = stiffener['params']
+    def add_stiffener(self, relative_position, relative_angle, stiffener, id=None):
+        stiffener.position = self._plating.position + relative_position*self._plating.unit_direction + 0.5*self._plating.thickness*self._plating.unit_normal
+        stiffener.angle = self._plating.angle + relative_angle
+        if id:
+            self._stiffeners[id] = stiffener
+        else:
+            self._stiffeners_counter += 1
+            self._stiffeners[self._stiffeners_counter] = stiffener            
+        self._create()
 
-            position = dist*self.plating.unit_direction + 0.5*self.plating.thickness*self.plating.unit_normal
-            angle = self.plating.angle + rel_angle
+    def remove_stiffener(self, id):
+        del self._stiffeners[id]
+        self._create()
 
-            if stiffener_type == 'FlatBar':
-                new_stiffener = self._create_flatbar(input_params, position, angle)
-                
-            elif stiffener_type == 'Angle':
-                new_stiffener = self._create_angle(input_params, position, angle)
-                
-            elif stiffener_type == 'Bulb':
-                new_stiffener = self._create_bulb(input_params, position, angle)
-                
-            elif stiffener_type == 'Tee':
-                new_stiffener = self._create_tee(input_params, position, angle)
-            else:
-                raise ValueError(f"Unknown stiffener type: {stiffener_type}")
+    def get_stiffener(self, id):
+        return self._stiffeners[id]
+
+    def add_stiffeners_group(self, relative_position, relative_angle, spacing, stiffener, count):
+        for i in range(count):
+            stiffener_i = copy.deepcopy(stiffener)
+            relative_pos_i = relative_position + spacing*i
+            self.add_stiffener(relative_pos_i, relative_angle, stiffener_i)
             
-            self._geometries.append(new_stiffener)
-
-
+    def reverse_stiffeners_orientation(self):
+        for _,stiffener in self._stiffeners.items():
+            disp = -1*stiffener.web.unit_direction*self._plating.thickness
+            stiffener.move(disp)
+            stiffener.angle += 180
+        self._create()
+        
+    def __str__(self) -> str:
+        msg = ''
+        msg += f'Plate: {self._plating}\n'
+        for i, stiffener in self._stiffeners.items():
+            msg += f'Stiffener {i}: {stiffener}\n'
+        return msg
 
 if __name__ == '__main__':
     def test0():
-        material = Steel(name='steel_A131',properties=dict(yield_strength=235e6, poisson_ratio=0.3, young_modulus=2.1e11))
-       
-        plating = FlatPlate(length=1, thickness=10/1000, position=[0,0], angle=0, material=material)
-       
-        stiffener = dict(type='FlatBar', dist=0.1, angle=90, params=dict(web_length=100/1000,
-                                                                        thickness=10/1000,
-                                                                        material=material))
-        stiffener2 = dict(type='Angle', dist=0.3, angle=90,
-                          params=dict(web_length=100/1000, web_thickness=10/1000,
-                                      flange_length=50/1000, flange_thickness=10/1000,
-                                      material=material))
+        panel = StiffenedPanel()
         
-        stiffener3 = dict(type='Bulb', dist=0.5, angle=90,
-                          params=dict(length=100/1000, thickness=10/1000, material=material))
+        steel = Steel(name='steel_A131',properties=dict(yield_strength=235e6,
+                                                            poisson_ratio=0.3,
+                                                            young_modulus=2.1e11))
         
-        stiffener4 = dict(type='Tee', dist=0.7, angle=90,
-                          params=dict(web_length=100/1000, web_thickness=10/1000,
-                                      flange_length=50/1000, flange_thickness=10/1000,
-                                      material=material))
-        
-        panel = GeneralFlatPanel(plating=plating,
-                                 stiffeners=[stiffener, stiffener2, stiffener3, stiffener4])
-        print(panel.area)
-        print(panel.inertia)
-        print(panel.centroid)
+        plate = FlatPlate.from_endpoints(initial_point=[0,0], final_point=[100, 0], thickness=10, material=steel)
+        panel.set_plating(plate=plate)
+
+        stiffener1 = FlatBar(web_length=100, thickness=10, material=steel)
+        panel.add_stiffener(relative_position=0, relative_angle=90, stiffener=stiffener1)
+
+        print(panel)
+        print(panel.section_properties)
         panel.plot()
 
+    def test1():
+        panel = StiffenedPanel()
+        
+        steel = Steel(name='steel_A131',properties=dict(yield_strength=235e6,
+                                                            poisson_ratio=0.3,
+                                                            young_modulus=2.1e11))
+        
+        plate = FlatPlate.from_endpoints(initial_point=[0,0], final_point=[2000, 0], thickness=10, material=steel)
+        panel.set_plating(plate=plate)
+
+        stiffener1 = FlatBar(web_length=300, thickness=10, material=steel)
+        stiffener2 = Bulb(length=100, thickness=6.35, material=steel)
+        stiffener3 = Tee(web_length=150, web_thickness=8, flange_length=75, flange_thickness=7, material=steel)
+        
+        panel.add_stiffener(relative_position=0, relative_angle=90, stiffener=stiffener1)
+        panel.add_stiffeners_group(relative_position=150, relative_angle=90, spacing=300, stiffener=stiffener2, count=5)
+        panel.add_stiffener(relative_position=1500, relative_angle=90, stiffener=stiffener3)
+        
+        print(panel)
+        print(panel.section_properties)
+        panel.plot()
+
+    def test2():
+        panel = StiffenedPanel()
+        
+        steel = Steel(name='steel_A131',properties=dict(yield_strength=235e6,
+                                                            poisson_ratio=0.3,
+                                                            young_modulus=2.1e11))
+        
+        plate = FlatPlate.from_endpoints(initial_point=[0,0], final_point=[2000, 0], thickness=10, material=steel)
+        panel.set_plating(plate=plate)
+
+        stiffener1 = FlatBar(web_length=300, thickness=10, material=steel)
+        stiffener2 = Bulb(length=100, thickness=6.35, material=steel)
+        stiffener3 = Tee(web_length=150, web_thickness=8, flange_length=75, flange_thickness=7, material=steel)
+        
+        panel.add_stiffener(relative_position=0, relative_angle=90, stiffener=stiffener1)
+        panel.add_stiffeners_group(relative_position=150, relative_angle=90, spacing=300, stiffener=stiffener2, count=5)
+        panel.add_stiffener(relative_position=1500, relative_angle=90, stiffener=stiffener3)
+        
+        print(panel)
+        print(panel.section_properties)
+        panel.plot()
+        panel.remove_stiffener(id=7)
+        print(panel)
+        print(panel.section_properties)
+        panel.plot()
+
+        panel.reverse_stiffeners_orientation()
+        print(panel)
+        print(panel.section_properties)
+        panel.plot()
+
+        panel.get_stiffener(id=3).flip_flange()
+        print(panel)
+        print(panel.section_properties)
+        panel.plot()
+
+
+        
+    test2()
+        
+
+        
+
+
     
-    test0()
+
+
+
+
+
+
+
