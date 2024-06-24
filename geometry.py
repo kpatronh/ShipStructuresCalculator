@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
 
 
 class Rectangle:
@@ -313,7 +312,6 @@ class RectanglesBasedGeometries:
                 Iyz += Irect['Iyza']
         return dict(Iy=Iy, Iz=Iz, Ix=Ix, Iyz=Iyz)
 
-
     @property
     def section_properties(self):
         return f"area = {self.area}\
@@ -333,7 +331,7 @@ class RectanglesBasedGeometries:
         min_x, max_x, min_y, max_y = min(xs), max(xs), min(ys), max(ys)
         return min_x, max_x, min_y, max_y
                     
-    def plot(self, edgecolor='gray', facecolor='silver', fill=True, line_width=1.5, zoom_factor=10):    
+    def plot(self, edgecolor='gray', facecolor='silver', fill=True, line_width=1.5, zoom_factor=100):    
         fig = plt.gcf()
         ax = fig.gca()
         
@@ -359,6 +357,8 @@ class RectanglesBasedGeometries:
             for rect in geometry.components:
                 msg += f"{rect}\n"
         return msg
+
+
 
 
 if __name__ == "__main__":
