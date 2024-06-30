@@ -182,5 +182,13 @@ if __name__ == '__main__':
         transverse_section.plot()
         print(transverse_section.section_properties)
 
+    def test2():
+        transverse_section = test0()
+        transverse_section.get_stiffened_panel(id=0).get_stiffener(id=2).web_length = 500
+        transverse_section.get_stiffened_panel(id=0).update()
+        transverse_section.update()
+        transverse_section.print_stiffened_panels()
+        transverse_section.plot()
+        print(transverse_section.section_properties)
 
     test0()
