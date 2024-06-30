@@ -5,7 +5,8 @@ from platings import FlatPlate
 import copy
 
 class StiffenedPanel(RectanglesBasedGeometries):
-    def __init__(self) -> None:
+    def __init__(self, name=None) -> None:
+        self.name = name
         self._plating = None
         self._stiffeners = dict()
         self._stiffeners_counter = 0
@@ -36,7 +37,7 @@ class StiffenedPanel(RectanglesBasedGeometries):
     def add_stiffener(self, relative_position, relative_angle, stiffener, id=None):
         stiffener.position = self._plating.position + relative_position*self._plating.unit_direction + 0.5*self._plating.thickness*self._plating.unit_normal
         stiffener.angle = self._plating.angle + relative_angle
-        if id:
+        if id is not None:
             self._stiffeners[id] = stiffener
         else:
             self._stiffeners_counter += 1
@@ -64,11 +65,19 @@ class StiffenedPanel(RectanglesBasedGeometries):
         self._create()
         
     def __str__(self) -> str:
-        msg = ''
-        msg += f'Plate: {self._plating}\n'
+        msg = f'Stiffened panel "{self.name}":\n'
+        msg += f' Plate: {self._plating}\n'
         for i, stiffener in self._stiffeners.items():
-            msg += f'Stiffener {i}: {stiffener}\n'
+            msg += f' Stiffener {i}: {stiffener}\n'
         return msg
+    
+    def set_stiffeners_angle(self, new_angle):
+        for _, stiffener in self._stiffeners.items():
+            stiffener.angle = new_angle
+        self._create()
+
+    def update(self):
+        self._create()
 
 if __name__ == '__main__':
     def test0():
@@ -111,7 +120,7 @@ if __name__ == '__main__':
         panel.plot()
 
     def test2():
-        panel = StiffenedPanel()
+        panel = StiffenedPanel(name='bottom_panel')
         
         steel = Steel(name='steel_A131',properties=dict(yield_strength=235e6,
                                                             poisson_ratio=0.3,
