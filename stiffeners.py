@@ -76,6 +76,8 @@ class FlatBar(RectanglesBasedGeometry):
         self._position = self._web.position
 
     def __str__(self):
+        if self._angle >= 360:
+            self._angle = self._angle - 360
         return f"FB {self.web_length}x{self.thickness}, {self.material.name}, at {self.position} with orientation {self.angle} degrees"
 
 
@@ -194,6 +196,8 @@ class Angle(RectanglesBasedGeometry):
         web_thickness = round(self._web_thickness, num_digits)
         flange_length = round(self._flange_length, num_digits)
         flange_thickness = round(self._flange_thickness, num_digits)
+        if self._angle >= 360:
+            self._angle = self._angle - 360
         return f"L{web_length}x{web_thickness}+{flange_length}x{flange_thickness}, {self.material.name}, at {self.position} with orientation {self.angle} degrees"
 
 
@@ -274,6 +278,8 @@ class Bulb(Angle):
         self._create_equivalent_angle()
 
     def __str__(self):
+        if self._angle >= 360:
+            self._angle = self._angle - 360
         return f"HP{self._length}x{self._thickness}, {self.material.name}, at {self.position} with orientation {self.angle} degrees"
         
 
@@ -389,6 +395,8 @@ class Tee(RectanglesBasedGeometry):
         web_thickness = round(self._web_thickness, num_digits)
         flange_length = round(self._flange_length, num_digits)
         flange_thickness = round(self._flange_thickness, num_digits)
+        if self._angle >= 360:
+            self._angle = self._angle - 360
         return f"T{web_length}x{web_thickness}+{flange_length}x{flange_thickness}, {self.material.name}, at {self.position} with orientation {self.angle} degrees"
 
 
