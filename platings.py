@@ -85,14 +85,16 @@ class FlatPlate(RectanglesBasedGeometry):
         unit_dir = dif/length
         
         x, y = unit_dir[0], unit_dir[1]
-        if x > 0 and y > 0:    # vector in first quadrant
+        if x > 0 and y >= 0:    # vector in first quadrant
             angle = np.degrees(np.arctan(y/x))
-        elif x < 0 and y > 0:  # vector in second quandrant
+        elif x < 0 and y >= 0:  # vector in second quandrant
             angle = 180 - np.degrees(np.arctan(y/x))
-        elif x < 0 and y < 0:  # vector in third quandrant
+        elif x < 0 and y <= 0:  # vector in third quandrant
             angle = 180 + np.degrees(np.arctan(y/x))
         else: # vector in fourth quadrant
             angle = 360 - np.degrees(np.arctan(y/x))
+        if angle >= 360:
+            angle = angle - 360
         
         return cls(length, thickness, position, angle, material)
 
