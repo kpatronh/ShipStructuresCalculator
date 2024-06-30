@@ -1,5 +1,5 @@
 from geometry import RectanglesBasedGeometries
-from src.definition.stiffeners import FlatBar, Angle, Bulb, Tee
+from stiffeners import FlatBar, Angle, Bulb, Tee
 from materials import Steel
 from platings import FlatPlate
 import copy
