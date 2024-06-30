@@ -331,7 +331,7 @@ class RectanglesBasedGeometries:
         min_x, max_x, min_y, max_y = min(xs), max(xs), min(ys), max(ys)
         return min_x, max_x, min_y, max_y
                     
-    def plot(self, edgecolor='gray', facecolor='silver', fill=True, line_width=1.5, zoom_factor=100):    
+    def plot(self, edgecolor='gray', facecolor='silver', fill=True, line_width=1.5, zoom_factor=3000):    
         fig = plt.gcf()
         ax = fig.gca()
         
