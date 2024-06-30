@@ -1,4 +1,9 @@
 import numpy as np
+
+import sys
+import os
+sys.path.append(os.path.dirname(__file__))
+
 from geometry import Rectangle, RectanglesBasedGeometry
 from materials import Steel
 
@@ -179,7 +184,7 @@ if __name__ == '__main__':
         print(plate)
         plate.plot()
     
-    test5()
+    test3()
 
 
 
