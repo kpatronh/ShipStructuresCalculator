@@ -1,6 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 class Rectangle:
     def __init__(self, width, height, position, angle): 
