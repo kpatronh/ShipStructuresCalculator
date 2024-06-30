@@ -2,7 +2,7 @@ from geometry import RectanglesBasedGeometries
 from panels import StiffenedPanel
 from platings import FlatPlate
 from materials import Steel
-from stiffeners import Bulb, Angle, Tee
+from src.definition.stiffeners import Bulb, Angle, Tee
 from copy import deepcopy
 
 class TransverseSection(RectanglesBasedGeometries):
