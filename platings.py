@@ -83,19 +83,28 @@ class FlatPlate(RectanglesBasedGeometry):
         dif = np.array(final_point) - np.array(initial_point)
         length = np.linalg.norm(dif)
         unit_dir = dif/length
-        
+
         x, y = unit_dir[0], unit_dir[1]
-        if x > 0 and y >= 0:    # vector in first quadrant
-            angle = np.degrees(np.arctan(y/x))
-        elif x < 0 and y >= 0:  # vector in second quandrant
-            angle = 180 - np.degrees(np.arctan(y/x))
-        elif x < 0 and y <= 0:  # vector in third quandrant
-            angle = 180 + np.degrees(np.arctan(y/x))
-        else: # vector in fourth quadrant
-            angle = 360 - np.degrees(np.arctan(y/x))
+
+        with np.errstate(divide='raise'):
+            try:
+                theta = np.degrees(np.arctan(abs(y)/abs(x)))
+            except:
+                x = 1e-16
+                theta = np.degrees(np.arctan(abs(y)/abs(x)))
+        
+        if x >= 0 and y >= 0:    # vector in first quadrant
+            angle = theta
+        elif x <= 0 and y >= 0:  # vector in second quadrant
+            angle = 180 - theta
+        elif x <= 0 and y <= 0:  # vector in third quadrant
+            angle = 180 + theta
+        elif x >= 0 and y <= 0:  # vector in fourth quadrant
+            angle = 360 - theta
+
         if angle >= 360:
             angle = angle - 360
-        
+
         return cls(length, thickness, position, angle, material)
 
     @property
@@ -159,7 +168,18 @@ if __name__ == '__main__':
         plate = FlatPlate.from_endpoints(initial_point, final_point, 6.35, material)
         print(plate)
         plate.plot()
-    test4()
+    
+    def test5():
+        material = Steel(name='steel_A131',properties=dict(yield_strength=235e6,
+                                                           poisson_ratio=0.3,
+                                                           young_modulus=2.1e11))
+        initial_point = np.array([-7000, 6000])
+        final_point = np.array([-6648, 3250])
+        plate = FlatPlate.from_endpoints(initial_point, final_point, 6.35, material)
+        print(plate)
+        plate.plot()
+    
+    test5()
 
 
 
