@@ -60,7 +60,7 @@ class StiffenedPanel(RectanglesBasedGeometries):
             stiffener_i = copy.deepcopy(stiffener)
             relative_pos_i = relative_position + spacing*i
             self.add_stiffener(relative_pos_i, relative_angle, stiffener_i)
-        self._stiffeners_spacing = 
+        self._stiffeners_spacing = spacing
             
     def reverse_stiffeners_orientation(self):
         for _,stiffener in self._stiffeners.items():
