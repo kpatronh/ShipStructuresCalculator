@@ -120,6 +120,15 @@ class FlatPlate(RectanglesBasedGeometry):
     def unit_normal(self):
         return self._plate.unit_normal
 
+    @property
+    def start_point(self):
+        return self.plate.position
+    
+    @property
+    def end_point(self):
+        return self.start_point + self.plate.unit_direction*self.plate.width
+
+
 if __name__ == '__main__':
 
     def test1():
