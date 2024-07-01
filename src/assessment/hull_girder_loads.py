@@ -1,7 +1,7 @@
 import numpy as np
 
-from ship_particulars import create_vessel
-from ship_particulars import Ship
+from ship import create_vessel
+from ship import Ship
 
 class HullGirderLoads:
     def __init__(self, vessel: Ship) -> None:

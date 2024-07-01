@@ -53,7 +53,18 @@ class TransverseSection(RectanglesBasedGeometries):
     def print_stiffened_panels(self):
         for _, panel in self._stiffened_panels.items():
             print(panel)
-        
+
+    @property
+    def section_modulus(self):
+        centroid = self.centroid
+        _, _, min_z, max_z = self.bounding_box
+        c_keel = abs(centroid[1] - min_z)
+        c_deck = abs(centroid[1] - max_z)
+        inertia = self.inertia
+        S_keel = inertia['Iy']/c_keel
+        S_deck = inertia['Iy']/c_deck
+        return dict(keel=S_keel, deck=S_deck)
+
 if __name__ == '__main__':
     def test0():
         
@@ -191,4 +202,15 @@ if __name__ == '__main__':
         transverse_section.plot()
         print(transverse_section.section_properties)
 
-    test0()
+    def test3():
+        transverse_section = test0()
+        print(transverse_section.section_modulus)
+        print('\n')
+        transverse_section.get_stiffened_panel(id=0).get_stiffener(id=2).web_length = 500
+        transverse_section.get_stiffened_panel(id=0).update()
+        transverse_section.update()
+        print(transverse_section.section_properties)
+        print(transverse_section.section_modulus)
+
+
+    test3()
