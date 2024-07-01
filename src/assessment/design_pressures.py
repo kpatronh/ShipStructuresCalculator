@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 import math
 import numpy as np
 
@@ -9,9 +13,6 @@ from ship import Ship
 
 class DesignPressures:
     def __init__(self) -> None:
-        """
-            TODO: include the vessel object in the class constructor
-        """
         pass
 
     def _calculate_design_wave_height(self, service_area: str) -> float:
@@ -269,7 +270,7 @@ class DesignPressures:
 
         return impact_load
 
-    def _compute_deck_pressures(self, struct_i: StructuralElement, inner_space: str):
+    def _compute_deck_pressures(self, struct_i: StructuralElement, inner_space='Accomodation'):
         if inner_space == "Accomodation":
             P_in = 5.0
         elif inner_space == "Evacuation":
@@ -284,7 +285,7 @@ class DesignPressures:
         return P_in
     
     def calculate_design_pressure(self, struct_i: StructuralElement, x_wl: float,
-                                  vessel: Ship) -> float:
+                                  vessel: Ship, inner_space: str) -> float:
         """
         TODO: Correct the inner_space variables
         """
@@ -292,7 +293,7 @@ class DesignPressures:
         design_pressure = 0.0
 
         if struct_i.struct_type == "Deck":
-            inner_space = "Accomodation"
+            #inner_space = "Accomodation"
             design_pressure = self._compute_deck_pressures(struct_i, inner_space)
         else:
             design_pressure_1 = self._calculate_loads_shell_envelope(x_wl, struct_i, vessel)
