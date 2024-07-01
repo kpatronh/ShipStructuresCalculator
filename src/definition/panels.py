@@ -12,7 +12,7 @@ class StiffenedPanel(RectanglesBasedGeometries):
         self._plating = None
         self._stiffeners = dict()
         self._stiffeners_counter = 0
-        self._stiffeners_spacing = None
+        self._stiffeners_spacing = 0
 
     @property
     def plating(self):
@@ -36,7 +36,6 @@ class StiffenedPanel(RectanglesBasedGeometries):
     def set_plating(self, plate):
         self._plating = plate
         self._create()
-        self._stiffeners_spacing = self._plating.length
 
     def add_stiffener(self, relative_position, relative_angle, stiffener, id=None):
         stiffener.position = self._plating.position + relative_position*self._plating.unit_direction + 0.5*self._plating.thickness*self._plating.unit_normal
@@ -60,7 +59,7 @@ class StiffenedPanel(RectanglesBasedGeometries):
             stiffener_i = copy.deepcopy(stiffener)
             relative_pos_i = relative_position + spacing*i
             self.add_stiffener(relative_pos_i, relative_angle, stiffener_i)
-        self._stiffeners_spacing = spacing
+        self._stiffeners_spacing = max(self._stiffeners_spacing, spacing)
             
     def reverse_stiffeners_orientation(self):
         for _,stiffener in self._stiffeners.items():
@@ -94,7 +93,7 @@ class StiffenedPanel(RectanglesBasedGeometries):
     
     @property
     def stiffener_spacing(self):
-        pass
+        return self._stiffeners_spacing
     
     @property 
     def design_pressure(self):
